@@ -8,6 +8,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app-src
 COPY requirements.txt .
+RUN apt-get update && apt-get install -y --no-install-recommends libatomic1 \
+ && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt \
  && playwright install --with-deps chromium
 COPY . .
