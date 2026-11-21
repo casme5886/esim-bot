@@ -230,8 +230,15 @@
       <button class="btn" id="p-new">➕ Yangi paket</button><div id="p-form"></div>
       <div class="section-title" style="margin-top:14px"><span>Paketlar</span><span id="p-count"></span></div>
       <div class="search" style="position:static"><input id="p-q" type="search" placeholder="Davlatni qidiring…" autocomplete="off"></div>
+      <div class="pr-chips" id="p-flt" style="margin:8px 0"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <label class="field" style="flex:1;margin:0"><span>Mintaqa</span><select id="p-reg"><option value="">Hammasi</option>${REGIONS.map(r => `<option value="${r.id}">${esc(r.uz)}</option>`).join('')}<option value="-">Tanlanmagan</option></select></label>
+        <label class="field" style="flex:1;margin:0"><span>Saralash</span><select id="p-sort"><option value="name">Nomi (A–Z)</option><option value="cnt">Faol paketlar soni</option><option value="cheap">Eng arzon narx</option><option value="exp">Eng qimmat narx</option></select></label>
+      </div>
       <div id="p-list"><div class="skeleton"></div></div>`;
     $('#p-q').oninput = () => renderPkgList();
+    $('#p-reg').onchange = () => renderPkgList();
+    $('#p-sort').onchange = () => renderPkgList();
     $('#p-new').onclick = () => { editing = null; renderForm(); };
     renderPricing(); renderAuto(); renderImport();
     try { pkgCache = await api('/api/admin/packages'); renderPkgList(); }
@@ -239,12 +246,44 @@
   }
 
   const opened = new Set();
+  let pkgFilter = 'all';
+  // Davlatlar bo'yicha filtrlar: nima ekanini bilish uchun (Top, yashirin, avto-xarid va h.k.)
+  const PKG_FILTERS = [
+    ['all', 'Hammasi', () => true],
+    ['top', '⭐ Top', ps => ps.some(p => p.popular)],
+    ['notop', 'Top emas', ps => !ps.some(p => p.popular)],
+    ['active', '✅ Faol', ps => ps.some(p => p.active)],
+    ['hidden', '🚫 Yashirin', ps => !ps.some(p => p.active)],
+    ['partial', '◐ Qisman yashirin', ps => ps.some(p => p.active) && ps.some(p => !p.active)],
+    ['auto', '🤖 Avto-xarid', ps => ps.some(p => p.trip_url)],
+    ['manual', '✋ Avtosiz', ps => ps.some(p => p.active && !p.trip_url)],
+    ['nocost', '💲 Tannarxsiz', ps => ps.some(p => !+p.cost_usd)],
+    ['noreg', '🗺 Mintaqasiz', ps => !ps[0].region],
+  ];
   function renderPkgList() {
     const groups = {};
     pkgCache.forEach(p => (groups[p.country] ||= []).push(p));
-    $('#p-count').textContent = `${Object.keys(groups).length} davlat · ${pkgCache.filter(p => p.active).length} faol paket`;
     const q = ($('#p-q')?.value || '').trim().toLowerCase();
-    const names = Object.keys(groups).sort().filter(n => !q || n.toLowerCase().includes(q));
+    const reg = $('#p-reg')?.value || '', sort = $('#p-sort')?.value || 'name';
+    const flt = PKG_FILTERS.find(f => f[0] === pkgFilter) || PKG_FILTERS[0];
+    const base = Object.keys(groups).filter(n => (!q || n.toLowerCase().includes(q))
+      && (!reg || (reg === '-' ? !groups[n][0].region : groups[n][0].region === reg)));
+    const box = $('#p-flt');
+    if (box) {
+      box.innerHTML = PKG_FILTERS.map(([id, label, fn]) => {
+        const n = base.filter(c => fn(groups[c])).length;
+        return `<button data-pf="${id}" class="${id === pkgFilter ? 'on' : ''}">${label} · ${n}</button>`;
+      }).join('');
+      $$('[data-pf]').forEach(b => b.onclick = () => { pkgFilter = b.dataset.pf; haptic('sel'); renderPkgList(); });
+    }
+    const minP = c => Math.min(...groups[c].filter(p => p.active).map(p => p.price).concat(groups[c].map(p => p.price)));
+    const act = c => groups[c].filter(p => p.active).length;
+    const names = base.filter(c => flt[2](groups[c])).sort((a, b) =>
+      sort === 'cnt' ? act(b) - act(a) || a.localeCompare(b)
+      : sort === 'cheap' ? minP(a) - minP(b)
+      : sort === 'exp' ? minP(b) - minP(a)
+      : a.localeCompare(b));
+    $('#p-count').textContent = `${names.length} / ${Object.keys(groups).length} davlat · ${pkgCache.filter(p => p.active).length} faol paket`;
     $('#p-list').innerHTML = names.length ? names.map(c => {
       const ps = groups[c].sort((a, b) => (a.daily - b.daily) || (a.data_gb - b.data_gb) || (a.days - b.days)), f = ps[0];
       const pop = ps.some(p => p.popular);
@@ -253,7 +292,7 @@
           <button class="star ${pop ? 'on' : ''}" data-star="${esc(c)}" data-id="${f.id}" title="Mashhur">⭐</button>
           <button class="icon-btn" data-addto="${esc(c)}" title="Shu davlatga paket qo'shish">➕</button>
           <button class="icon-btn" data-open="${esc(c)}">${opened.has(c) ? '▲' : '▼'}</button></div>
-        <div class="sub" style="padding:6px 14px 10px">${ps.filter(p => p.active).length} faol paket · ${som(Math.min(...ps.map(p => p.price)))} dan</div>
+        <div class="sub" style="padding:6px 14px 10px">${ps.filter(p => p.active).length} faol${ps.some(p => !p.active) ? ` · ${ps.filter(p => !p.active).length} yashirin` : ''} paket · ${som(Math.min(...ps.map(p => p.price)))} dan${ps.some(p => p.trip_url) ? ' · 🤖' : ''}${pop ? ' · ⭐ Top' : ''}</div>
         ${!opened.has(c) ? '' : ps.map(p => `<div class="pkg-row ${p.active ? '' : 'off'}">
           <div class="grow"><b>${gbS(p.data_gb, p.daily)} · ${p.days} kun</b><div class="sub">${som(p.price)}${p.cost_usd ? ` · tannarx $${+p.cost_usd}` : ''} · ID ${p.id}${p.trip_url ? ' · 🤖 avto' : ''}</div></div>
           <label class="switch"><input type="checkbox" data-toggle="${p.id}" ${p.active ? 'checked' : ''}><span></span></label>
