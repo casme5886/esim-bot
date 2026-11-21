@@ -230,15 +230,21 @@
       <button class="btn" id="p-new">➕ Yangi paket</button><div id="p-form"></div>
       <div class="section-title" style="margin-top:14px"><span>Paketlar</span><span id="p-count"></span></div>
       <div class="search" style="position:static"><input id="p-q" type="search" placeholder="Davlatni qidiring…" autocomplete="off"></div>
-      <div class="pr-chips" id="p-flt" style="margin:8px 0"></div>
+      <button class="btn soft" id="p-flt-tg" style="margin:8px 0;width:100%;display:flex;justify-content:space-between;align-items:center"><span id="p-flt-lbl">🔍 Filtr</span><span id="p-flt-ar">▼</span></button>
+      <div id="p-flt-box" style="display:none">
+      <div class="pr-chips" id="p-flt" style="margin:0 0 8px"></div>
       <div style="display:flex;gap:8px;margin-bottom:10px">
         <label class="field" style="flex:1;margin:0"><span>Mintaqa</span><select id="p-reg"><option value="">Hammasi</option>${REGIONS.map(r => `<option value="${r.id}">${esc(r.uz)}</option>`).join('')}<option value="-">Tanlanmagan</option></select></label>
         <label class="field" style="flex:1;margin:0"><span>Saralash</span><select id="p-sort"><option value="name">Nomi (A–Z)</option><option value="cnt">Faol paketlar soni</option><option value="cheap">Eng arzon narx</option><option value="exp">Eng qimmat narx</option></select></label>
-      </div>
+      </div></div>
       <div id="p-list"><div class="skeleton"></div></div>`;
     $('#p-q').oninput = () => renderPkgList();
     $('#p-reg').onchange = () => renderPkgList();
     $('#p-sort').onchange = () => renderPkgList();
+    let fltOpen = false; try { fltOpen = localStorage.getItem('pkgFltOpen') === '1'; } catch (_) {}
+    const applyFlt = () => { $('#p-flt-box').style.display = fltOpen ? '' : 'none'; $('#p-flt-ar').textContent = fltOpen ? '▲' : '▼'; };
+    $('#p-flt-tg').onclick = () => { fltOpen = !fltOpen; try { localStorage.setItem('pkgFltOpen', fltOpen ? '1' : '0'); } catch (_) {} haptic('sel'); applyFlt(); };
+    applyFlt();
     $('#p-new').onclick = () => { editing = null; renderForm(); };
     renderPricing(); renderAuto(); renderImport();
     try { pkgCache = await api('/api/admin/packages'); renderPkgList(); }
@@ -283,6 +289,13 @@
       : sort === 'cheap' ? minP(a) - minP(b)
       : sort === 'exp' ? minP(b) - minP(a)
       : a.localeCompare(b));
+    const lbl = $('#p-flt-lbl'); if (lbl) {
+      const parts = [];
+      if (pkgFilter !== 'all') parts.push(flt[1]);
+      if (reg) parts.push(reg === '-' ? 'Mintaqasiz' : (REG[reg] || reg));
+      if (sort !== 'name') parts.push($('#p-sort').selectedOptions[0].textContent);
+      lbl.textContent = '🔍 Filtr' + (parts.length ? ': ' + parts.join(' · ') : '');
+    }
     $('#p-count').textContent = `${names.length} / ${Object.keys(groups).length} davlat · ${pkgCache.filter(p => p.active).length} faol paket`;
     $('#p-list').innerHTML = names.length ? names.map(c => {
       const ps = groups[c].sort((a, b) => (a.daily - b.daily) || (a.data_gb - b.data_gb) || (a.days - b.days)), f = ps[0];

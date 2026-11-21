@@ -1,4 +1,4 @@
-const ADMIN_VER = 46;   // admin.js o'zgarsa oshiriladi
+const ADMIN_VER = 47;   // admin.js o'zgarsa oshiriladi
 /* Booking eSIM Mini App — mijoz qismi */
 const tg = window.Telegram?.WebApp;
 tg?.ready(); tg?.expand();
