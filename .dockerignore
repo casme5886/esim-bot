@@ -20,3 +20,4 @@ seed_packages.imported.json
 .git
 *.bat
 *.ps1
+coolify-env.txt
