@@ -84,7 +84,26 @@ async def _get_context_unlocked():
         locale="en-US",
         args=["--disable-blink-features=AutomationControlled"],
     )
+    await _import_session(_context)
     return _context
+
+
+async def _import_session(ctx):
+    """Boshqa kompyuterdan ko'chirilgan Trip.com sessiyasini (trip_state.json) bir marta yuklaydi.
+    Windows profili Linux'da ochilmaydi (cookie'lar shifrlangan), shuning uchun cookie'lar shu fayl orqali o'tadi."""
+    f = BASE / "trip_state.json"
+    if not f.exists():
+        return
+    try:
+        import json
+        state = json.loads(f.read_text(encoding="utf-8"))
+        cookies = [c for c in state.get("cookies", []) if "trip" in c.get("domain", "")]
+        if cookies:
+            await ctx.add_cookies(cookies)
+        f.rename(f.with_suffix(".imported.json"))
+        log.info("Trip.com sessiyasi yuklandi: %s ta cookie", len(cookies))
+    except Exception as e:
+        log.warning("trip_state.json yuklanmadi: %s", e)
 
 
 async def _new_page():

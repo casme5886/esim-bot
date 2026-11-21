@@ -18,3 +18,4 @@ profile.stamp
 run_import.*
 seed_packages.imported.json
 coolify-env.txt
+trip_state*.json

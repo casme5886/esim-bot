@@ -21,3 +21,4 @@ seed_packages.imported.json
 *.bat
 *.ps1
 coolify-env.txt
+trip_state*.json
