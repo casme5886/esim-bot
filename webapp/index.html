@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta name="color-scheme" content="light only">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Booking eSIM</title>
+<link rel="icon" href="/static/favicon.png">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="/static/app.css?v=49">
+</head>
+<body>
+<main>
+  <!-- KATALOG -->
+  <section id="v-catalog">
+    <div class="topbar">
+      <div class="brand"><img class="logo" src="/static/logo180.png" alt=""><span>Booking <b>eSIM</b></span></div>
+      <div class="top-picks"><label class="lang-pick cur-pick hidden" id="cur-pick">💱 <span id="cur-cur">USD</span> ▾<select id="cur-sel" aria-label="Currency"></select></label>
+      <label class="lang-pick">🌐 <span id="lang-cur">RU</span> ▾<select id="lang-sel" aria-label="Language"></select></label></div>
+    </div>
+    <div class="banners hidden" id="banners"><div class="bn-track" id="bn-track"></div><div class="bn-dots" id="bn-dots"></div></div>
+    <div class="hero">
+      <h1 data-t="hero_title"></h1>
+      <p data-t="hero_sub"></p>
+      <div class="chips"><span class="chip" data-t="chip1"></span><span class="chip" data-t="chip3"></span></div>
+      <div class="pay-row" id="pay-row"></div>
+    </div>
+    <div class="search"><input id="q" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="q-clear hidden" id="q-clear" aria-label="Clear">✕</button></div>
+    <div id="popular-wrap" class="hidden">
+      <div class="section-title" data-t="popular"></div>
+      <div id="popular" class="popular"></div>
+    </div>
+    <div id="regions" class="pills"></div>
+    <div id="pick-bar" class="pick-bar hidden"></div>
+    <div id="countries" class="cgrid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+  </section>
+
+  <!-- DAVLAT PAKETLARI (Trip.com uslubida) -->
+  <section id="v-country" class="hidden">
+    <div class="banner">
+      <button class="back" id="c-back" aria-label="back">‹</button>
+      <div class="bflag" id="c-flagbg"></div>
+      <div class="flag" id="c-flag"></div>
+      <h2 id="c-name"></h2>
+      <div class="c-sale hidden" id="c-sale"></div>
+      <div class="chips"><span class="chip" data-t="b1"></span><span class="chip" data-t="b2"></span><span class="chip" data-t="b3"></span></div>
+    </div>
+    <div class="sku">
+      <div class="sku-title" data-t="pkg_price"></div>
+      <div class="sku-label" data-t="days_label"></div>
+      <div class="chip-grid" id="days"></div>
+      <div class="sku-label" data-t="data_label"></div>
+      <div id="datas"></div>
+      <div class="detail hidden" id="detail"></div>
+    </div>
+    <div class="sku hidden" id="c-cover"></div>
+    <div class="sku hidden" id="c-alt"></div>
+    <div class="sku">
+      <div class="sku-title" data-t="included"></div>
+      <div class="inc"><span>✅</span><span data-t="inc1"></span></div>
+      <div class="inc"><span>✅</span><span data-t="inc2"></span></div>
+      <div class="inc"><span>✅</span><span data-t="inc3"></span></div>
+      <div class="inc"><span>✅</span><span data-t="inc4"></span></div>
+    </div>
+    <div class="sku">
+      <div class="sku-title" data-t="how"></div>
+      <ol class="steps"><li data-t="how1"></li><li data-t="how2"></li><li data-t="how3"></li></ol>
+      <div class="note" style="margin-top:4px;padding:10px 0 0;background:none"><span data-t="check_note"></span> <a data-go="device" data-t="check_link"></a></div>
+    </div>
+    <div class="buybar" id="buybar">
+      <div class="bb-left"><div class="bb-sel" id="bb-sel"></div><div class="bb-price" id="bb-price"></div></div>
+      <button class="bb-btn" id="buy-btn"></button>
+    </div>
+  </section>
+
+  <!-- BUYURTMALAR -->
+  <section id="v-orders" class="hidden">
+    <div class="section-title" data-t="my_orders"></div>
+    <div id="orders"></div>
+  </section>
+
+  <!-- MIJOZNING eSIM'I -->
+  <section id="v-esim" class="hidden"></section>
+  <section id="v-pay" class="hidden"></section>
+  <section id="v-chat" class="hidden"></section>
+  <section id="v-account" class="hidden"></section>
+  <section id="v-doc" class="hidden"></section>
+
+  <!-- YORDAM -->
+  <section id="v-help" class="hidden">
+    <div class="seg" id="help-seg">
+      <button data-h="device" class="on" data-t="h_device"></button>
+      <button data-h="install" data-t="h_install"></button>
+      <button data-h="faq" data-t="h_faq"></button>
+    </div>
+    <div id="h-device"></div>
+    <div id="h-install" class="hidden"></div>
+    <div id="h-faq" class="hidden"></div>
+    <button class="btn soft" id="support-btn"><span data-t="support"></span><span class="cnt hidden" id="sup-cnt"></span></button>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="v-admin" class="hidden">
+    <div class="seg" id="admin-seg">
+      <button data-a="stats" class="on">📊 Hisobot</button>
+      <button data-a="orders">🧾 Buyurtma<span class="dot hidden" id="a-dot"></span></button>
+      <button data-a="pkgs">📦 Paket</button>
+      <button data-a="chat">💬 Chat<span class="dot hidden" id="a-chat-dot"></span></button>
+      <button data-a="promo">🎁 Promo</button>
+      <button data-a="card">💳 Karta</button>
+    </div>
+    <div id="a-stats"></div>
+    <div id="a-orders" class="hidden"></div>
+    <div id="a-pkgs" class="hidden"></div>
+    <div id="a-chat" class="hidden"></div>
+    <div id="a-promo" class="hidden"></div>
+    <div id="a-card" class="hidden"></div>
+  </section>
+</main>
+
+<nav><div class="in">
+  <button data-tab="catalog" class="on"><span class="i">🌍</span><span data-t="nav_catalog"></span></button>
+  <button data-tab="orders"><span class="i">📦</span><span data-t="nav_orders"></span></button>
+  <button data-tab="help"><span class="i">ℹ️</span><span data-t="nav_help"></span></button>
+  <button data-tab="account"><span class="i">👤</span><span data-t="nav_account"></span><span class="dot hidden" id="help-dot"></span></button>
+  <button data-tab="admin" class="hidden" id="nav-admin"><span class="i">⚙️</span>Admin<span class="dot hidden" id="nav-dot"></span></button>
+</div></nav>
+
+<script src="/static/i18n.js"></script>
+<script>/* faqat kerakli til faylini yuklaymiz (10 ta til o'rniga 1 ta) */
+(function () {
+  var ok = I18N_LANGS.map(function (x) { return x[0]; });
+  function p(l) { l = String(l || '').toLowerCase().split(/[-_]/)[0]; return ok.indexOf(l) >= 0 ? l : ''; }
+  var s = ''; try { s = localStorage.getItem('lang'); } catch (e) {}
+  var w = window.Telegram && Telegram.WebApp, u = (w && w.initDataUnsafe && w.initDataUnsafe.user) || {};
+  var L = p(new URLSearchParams(location.search).get('lang')) || p(s) || p(u.language_code) || I18N_DEFAULT;
+  window.BOOT_LANG = L;
+  document.write('<script src="/static/i18n/' + L + '.js?v=' + I18N_VER + '"><\/script>');
+})();</script>
+<script src="/static/data.js?v=26"></script>
+<script src="/static/search.js?v=2"></script>
+<script src="/static/app.js?v=49"></script>
+</body>
+</html>
