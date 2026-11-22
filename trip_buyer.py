@@ -184,7 +184,7 @@ async def _read_total(page) -> float | None:
 # ---------------------------------------------------------------- Telegram
 def _confirm_kb(oid, price):
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text=f"🛒 Sotib ol (${price:g})", callback_data=f"tb:{oid}"),
+        InlineKeyboardButton(text=f"🛒 Sotib ol (${price:g})", style="success", callback_data=f"tb:{oid}"),
         InlineKeyboardButton(text="✋ Qo'lda qilaman", callback_data=f"tn:{oid}"),
     ]])
 

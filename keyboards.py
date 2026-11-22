@@ -32,7 +32,7 @@ def open_shop_kb(lang: str):
     """/start xabari ostidagi katta tugma + til tugmasi."""
     rows = []
     if WEBAPP_URL:
-        rows.append([InlineKeyboardButton(text=i18n.t(lang, "open_shop"), web_app=WebAppInfo(url=webapp_url(lang)))])
+        rows.append([InlineKeyboardButton(text=i18n.t(lang, "open_shop"), style="success", web_app=WebAppInfo(url=webapp_url(lang)))])
     rows.append([InlineKeyboardButton(text=i18n.t(lang, "lang_btn"), callback_data="lang:menu")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
@@ -113,15 +113,15 @@ def cancel_receipt_kb(oid, lang="ru"):
 # --- admin ---
 def admin_receipt_kb(oid):
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="✅ To'lov tasdiqlandi", callback_data=f"ap:{oid}"),
-        InlineKeyboardButton(text="❌ Rad etish", callback_data=f"ar:{oid}"),
+        InlineKeyboardButton(text="✅ To'lov tasdiqlandi", style="success", callback_data=f"ap:{oid}"),
+        InlineKeyboardButton(text="❌ Rad etish", style="danger", callback_data=f"ar:{oid}"),
     ]])
 
 
 def admin_deliver_kb(oid):
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="📤 QR yuborish", callback_data=f"ad:{oid}"),
-        InlineKeyboardButton(text="↩️ Bekor (pul qaytarildi)", callback_data=f"ax:{oid}"),
+        InlineKeyboardButton(text="📤 QR yuborish", style="success", callback_data=f"ad:{oid}"),
+        InlineKeyboardButton(text="↩️ Bekor (pul qaytarildi)", style="danger", callback_data=f"ax:{oid}"),
     ]])
 
 
